@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
     <AzureFunctionsVersion>v4</AzureFunctionsVersion>
     <UserSecretsId>d5ff7915-e97d-4d9b-b3c1-6db7d43f3d08</UserSecretsId>
   </PropertyGroup>

@@ -31,24 +31,23 @@ public class DownloadFile
         var stream = await new StreamReader(req.Body, Encoding.UTF8).ReadToEndAsync();
         FileDownloadRequestObject requestObect = JsonConvert.DeserializeObject<FileDownloadRequestObject>(stream);
 
-        var blobStorageConnector = new BlobStorageConnector(requestObect.ContainerName);
-        var response = await blobStorageConnector.GetFileContentAsync(requestObect.Path, requestObect.BlobId);
+        var blobStorageConnector = new BlobStorageConnector(requestObect!.ContainerName!);
+        var content = await blobStorageConnector.GetFileContentAsync(requestObect.Path!, requestObect.BlobId);
 
-        Stream blobStream = response.Content.ToStream();
-        HttpResponseMessage message = new HttpResponseMessage(HttpStatusCode.OK);
+        HttpResponseMessage message = new(HttpStatusCode.OK);
 
-        message.Content = new StreamContent(blobStream);
-        message.Content.Headers.ContentLength = response.Details.ContentLength;
+        message.Content = new StreamContent(content.Stream!);
+        message.Content.Headers.ContentLength = content.ContentLength;
         message.StatusCode = HttpStatusCode.OK;
-        message.Content.Headers.ContentType = new MediaTypeHeaderValue(response.Details.ContentType);
+        message.Content.Headers.ContentType = new MediaTypeHeaderValue(content.ContentType!);
         message.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
         {
-            FileName = $"CopyOf_{response.Details.CopyId}",
-            Size = response.Details.ContentLength
+            FileName = $"CopyOf_{content.FileName}",
+            Size = content.ContentLength
         };
 
         return message;
-        
+
     }
 
     private sealed class FileDownloadRequestObject
@@ -57,5 +56,7 @@ public class DownloadFile
         public string? Path { get; set; }
         public Guid BlobId { get; set; } = Guid.NewGuid();
     }
+
+
 }
 

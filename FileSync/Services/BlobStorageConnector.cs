@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace FileSync.Services;
 internal class BlobStorageConnector
 {
-    private readonly string _blobConnectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
+    private readonly string _blobConnectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage")!;
     private readonly BlobContainerClient _blobContainerClient;
 
     internal BlobStorageConnector(string containerName)
@@ -64,12 +64,32 @@ internal class BlobStorageConnector
     internal async Task<bool> DeleteFileAsync(string directoryPath, Guid blobId) => 
         (await _blobContainerClient.DeleteBlobIfExistsAsync($"{directoryPath}{'/'}{blobId}")).Value;
 
-    internal async Task<BlobDownloadResult> GetFileContentAsync(string directoryPath, Guid blobId, System.Threading.CancellationToken ct = default)
+    internal async Task<Content> GetFileContentAsync(string directoryPath, Guid blobId, System.Threading.CancellationToken ct = default)
     {
-        var blob = _blobContainerClient.GetBlobClient($"{directoryPath}{'/'}{blobId}");
-        await blob.DownloadAsync(ct);
-        var blobInfo = await blob.DownloadContentAsync(ct);
+        var storagePath = $"{directoryPath}{'/'}{blobId}";
+        var blob = _blobContainerClient.GetBlobClient(storagePath);
 
-        return blobInfo;
+        var blobInfo = await blob.DownloadContentAsync(ct);
+        Stream blobStream = blobInfo.Value.Content.ToStream();
+
+        return new Content
+        {
+            FileName = storagePath,
+            Type = blob.Name,
+            Stream = blobStream,
+            ContentHash = BitConverter.ToString(blobInfo.Value.Details.ContentHash).Replace("-", ""),
+            ContentLength = blobInfo.Value.Details.ContentLength,
+            ContentType = blobInfo.Value.Details.ContentType
+        };
+    }
+
+    internal class Content
+    {
+        public string? FileName { get; set; }
+        public string? Type { get; set; }
+        public Stream? Stream { get; set; }
+        public string? ContentHash { get; set; }
+        public long? ContentLength { get; set; }
+        public string? ContentType { get; set; }
     }
 }
