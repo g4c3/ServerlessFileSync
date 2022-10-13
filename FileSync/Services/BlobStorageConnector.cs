@@ -61,5 +61,6 @@ internal class BlobStorageConnector
         return blobInfo;
     }
 
-
+    internal async Task<bool> DeleteFileAsync(string directoryPath, Guid blobId) => 
+        (await _blobContainerClient.DeleteBlobIfExistsAsync($"{directoryPath}{'/'}{blobId}")).Value;
 }
