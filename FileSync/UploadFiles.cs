@@ -10,9 +10,9 @@ using Microsoft.OpenApi.Models;
 
 namespace FileSync;
 
-public class FileUpload
+public class UploadFiles
 {
-    public FileUpload(){ }
+    public UploadFiles(){ }
 
     [FunctionName("UploadFiles")]
     [OpenApiOperation(operationId: "Run", tags: new[] { "name" })]

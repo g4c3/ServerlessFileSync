@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection.Metadata;
 using System.Threading.Tasks;
 
 namespace FileSync.Services;
@@ -63,4 +64,13 @@ internal class BlobStorageConnector
 
     internal async Task<bool> DeleteFileAsync(string directoryPath, Guid blobId) => 
         (await _blobContainerClient.DeleteBlobIfExistsAsync($"{directoryPath}{'/'}{blobId}")).Value;
+
+    internal async Task<BlobDownloadResult> GetFileContentAsync(string directoryPath, Guid blobId, System.Threading.CancellationToken ct = default)
+    {
+        var blob = _blobContainerClient.GetBlobClient($"{directoryPath}{'/'}{blobId}");
+        await blob.DownloadAsync(ct);
+        var blobInfo = await blob.DownloadContentAsync(ct);
+
+        return blobInfo;
+    }
 }
