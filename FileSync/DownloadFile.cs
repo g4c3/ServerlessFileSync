@@ -29,12 +29,12 @@ public class DownloadFile
         [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req)
     {
         var stream = await new StreamReader(req.Body, Encoding.UTF8).ReadToEndAsync();
-        FileDownloadRequestObject requestObect = JsonConvert.DeserializeObject<FileDownloadRequestObject>(stream);
+        FileDownloadRequestObject requestObect = JsonConvert.DeserializeObject<FileDownloadRequestObject>(stream)!;
 
         var blobStorageConnector = new BlobStorageConnector(requestObect!.ContainerName!);
         var content = await blobStorageConnector.GetFileContentAsync(requestObect.Path!, requestObect.BlobId);
 
-        HttpResponseMessage message = new(HttpStatusCode.OK);
+        HttpResponseMessage message = new();
 
         message.Content = new StreamContent(content.Stream!);
         message.Content.Headers.ContentLength = content.ContentLength;

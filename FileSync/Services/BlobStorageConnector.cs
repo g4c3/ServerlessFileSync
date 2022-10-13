@@ -2,6 +2,7 @@
 using Azure.Storage.Blobs.Models;
 using FileSync.Entities;
 using Microsoft.AspNetCore.Http;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,6 +33,9 @@ internal class BlobStorageConnector
             var header = new BlobHttpHeaders { ContentType = file.ContentType };
 
             await blob.UploadAsync(myBlob, header, cancellationToken: ct);
+            var metaData = new Dictionary<string, string>();
+            metaData.Add("FileName", file.FileName);
+            await blob.SetMetadataAsync(metaData, cancellationToken: ct);
 
             var properties = (await blob.GetPropertiesAsync(cancellationToken: ct)).Value;
             
@@ -71,10 +75,9 @@ internal class BlobStorageConnector
 
         var blobInfo = await blob.DownloadContentAsync(ct);
         Stream blobStream = blobInfo.Value.Content.ToStream();
-
         return new Content
         {
-            FileName = storagePath,
+            FileName = blobInfo.Value.Details.Metadata["FileName"],
             Type = blob.Name,
             Stream = blobStream,
             ContentHash = BitConverter.ToString(blobInfo.Value.Details.ContentHash).Replace("-", ""),
