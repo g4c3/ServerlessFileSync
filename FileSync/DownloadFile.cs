@@ -1,10 +1,10 @@
-using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using FileSync.DTOs;
 using FileSync.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs;
@@ -29,7 +29,7 @@ public class DownloadFile
         [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req)
     {
         var stream = await new StreamReader(req.Body, Encoding.UTF8).ReadToEndAsync();
-        FileDownloadRequestObject requestObect = JsonConvert.DeserializeObject<FileDownloadRequestObject>(stream)!;
+        DODRequest requestObect = JsonConvert.DeserializeObject<DODRequest>(stream)!;
 
         var blobStorageConnector = new BlobStorageConnector(requestObect!.ContainerName!);
         var content = await blobStorageConnector.GetFileContentAsync(requestObect.Path!, requestObect.BlobId);
@@ -47,16 +47,6 @@ public class DownloadFile
         };
 
         return message;
-
     }
-
-    private sealed class FileDownloadRequestObject
-    {
-        public string? ContainerName { get; set; }
-        public string? Path { get; set; }
-        public Guid BlobId { get; set; } = Guid.NewGuid();
-    }
-
-
 }
 

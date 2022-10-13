@@ -1,5 +1,6 @@
 using System.Net;
 using System.Threading.Tasks;
+using FileSync.DTOs;
 using FileSync.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +13,7 @@ namespace FileSync;
 
 public class UploadFiles
 {
-    public UploadFiles(){ }
+    public UploadFiles() { }
 
     [FunctionName("UploadFiles")]
     [OpenApiOperation(operationId: "Run", tags: new[] { "name" })]
@@ -21,7 +22,7 @@ public class UploadFiles
     public static async Task<IActionResult> Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req)
     {
-        FileUploadRequestObject requestObect = new()
+        UploadRequest requestObect = new()
         {
             ContainerName = req.Form["ContainerName"],
             Files = req.Form.Files,
@@ -32,14 +33,6 @@ public class UploadFiles
         var response = await blobStorageConnector.SaveFilesAsync(requestObect.Files, requestObect.Path);
 
         return new OkObjectResult(response);
-    }
-
-    private sealed class FileUploadRequestObject
-    {
-        public string ContainerName { get; set; }
-        public IFormFileCollection Files { get; set; }
-        public string Path { get; set; }
-    }
-    
+    }    
 }
 

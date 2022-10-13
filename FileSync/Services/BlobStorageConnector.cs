@@ -2,7 +2,6 @@
 using Azure.Storage.Blobs.Models;
 using FileSync.Entities;
 using Microsoft.AspNetCore.Http;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.IO;

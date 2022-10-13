@@ -1,8 +1,8 @@
-using System;
 using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using FileSync.DTOs;
 using FileSync.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -28,20 +28,12 @@ public class DeleteFile
         [HttpTrigger(AuthorizationLevel.Function, "delete", Route = null)] HttpRequest req)
     {
         var stream = await new StreamReader(req.Body, Encoding.UTF8).ReadToEndAsync();
-        FileDownloadRequestObject requestObect = JsonConvert.DeserializeObject<FileDownloadRequestObject>(stream);
+        DODRequest requestObect = JsonConvert.DeserializeObject<DODRequest>(stream)!;
 
-        var blobStorageConnector = new BlobStorageConnector(requestObect.ContainerName);
-        var response = await blobStorageConnector.DeleteFileAsync(requestObect.Path, requestObect.BlobId);
+        var blobStorageConnector = new BlobStorageConnector(requestObect.ContainerName!);
+        var response = await blobStorageConnector.DeleteFileAsync(requestObect.Path!, requestObect.BlobId);
 
         return new OkObjectResult(response);
     }
-
-    private sealed class FileDownloadRequestObject
-    {
-        public string? ContainerName { get; set; }
-        public string? Path { get; set; }
-        public Guid BlobId { get; set; } = Guid.NewGuid();
-    }
-
 }
 
