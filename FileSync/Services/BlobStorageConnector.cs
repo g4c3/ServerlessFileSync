@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FileSync.Services;
@@ -20,7 +21,7 @@ internal class BlobStorageConnector
         _blobContainerClient.CreateIfNotExists();
     }
 
-    internal async Task<List<FileModel>> SaveFilesAsync(IFormFileCollection files, string directoryPath, System.Threading.CancellationToken ct = default)
+    internal async Task<List<FileModel>> SaveFilesAsync(IFormFileCollection files, string directoryPath, CancellationToken ct = default)
     {
         List<FileModel> result = new();
         foreach (var file in files)
@@ -32,8 +33,10 @@ internal class BlobStorageConnector
             var header = new BlobHttpHeaders { ContentType = file.ContentType };
 
             await blob.UploadAsync(myBlob, header, cancellationToken: ct);
-            var metaData = new Dictionary<string, string>();
-            metaData.Add("FileName", file.FileName);
+            var metaData = new Dictionary<string, string>
+            {
+                {nameof(file.FileName), file.FileName }
+            };
             await blob.SetMetadataAsync(metaData, cancellationToken: ct);
 
             var properties = (await blob.GetPropertiesAsync(cancellationToken: ct)).Value;
@@ -56,7 +59,7 @@ internal class BlobStorageConnector
         return result;
     }
 
-    internal async Task<BlobDownloadInfo> GetBlobInfoAsync(string directoryPath, System.Threading.CancellationToken ct = default)
+    internal async Task<BlobDownloadInfo> GetBlobInfoAsync(string directoryPath, CancellationToken ct = default)
     {
         var blobClient = _blobContainerClient.GetBlobClient(directoryPath);
         var blobInfo = await blobClient.DownloadAsync(ct);
@@ -67,7 +70,7 @@ internal class BlobStorageConnector
     internal async Task<bool> DeleteFileAsync(string directoryPath, Guid blobId) => 
         (await _blobContainerClient.DeleteBlobIfExistsAsync($"{directoryPath}{'/'}{blobId}")).Value;
 
-    internal async Task<Content> GetFileContentAsync(string directoryPath, Guid blobId, System.Threading.CancellationToken ct = default)
+    internal async Task<Content> GetFileContentAsync(string directoryPath, Guid blobId, CancellationToken ct = default)
     {
         var storagePath = $"{directoryPath}{'/'}{blobId}";
         var blob = _blobContainerClient.GetBlobClient(storagePath);

@@ -28,7 +28,7 @@ public class DeleteFile
         [HttpTrigger(AuthorizationLevel.Function, "delete", Route = null)] HttpRequest req)
     {
         var stream = await new StreamReader(req.Body, Encoding.UTF8).ReadToEndAsync();
-        DODRequest requestObect = JsonConvert.DeserializeObject<DODRequest>(stream)!;
+        DoDRequest requestObect = JsonConvert.DeserializeObject<DoDRequest>(stream)!;
 
         var blobStorageConnector = new BlobStorageConnector(requestObect.ContainerName!);
         var response = await blobStorageConnector.DeleteFileAsync(requestObect.Path!, requestObect.BlobId);

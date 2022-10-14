@@ -18,7 +18,7 @@ namespace FileSync;
 
 public class DownloadFile
 {
-    public DownloadFile() { }
+    public  DownloadFile() { }
 
     [FunctionName("DownloadFile")]
     [OpenApiOperation(operationId: "Run", tags: new[] { "name" })]
@@ -26,19 +26,21 @@ public class DownloadFile
     [OpenApiParameter(name: "name", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The **Name** parameter")]
     [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]
     public async Task<HttpResponseMessage> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req)
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req)
     {
         var stream = await new StreamReader(req.Body, Encoding.UTF8).ReadToEndAsync();
-        DODRequest requestObect = JsonConvert.DeserializeObject<DODRequest>(stream)!;
+        DoDRequest requestObect = JsonConvert.DeserializeObject<DoDRequest>(stream)!;
 
         var blobStorageConnector = new BlobStorageConnector(requestObect!.ContainerName!);
         var content = await blobStorageConnector.GetFileContentAsync(requestObect.Path!, requestObect.BlobId);
 
-        HttpResponseMessage message = new();
+        HttpResponseMessage message = new()
+        {
+            Content = new StreamContent(content.Stream!),
+            StatusCode = HttpStatusCode.OK
+        };
 
-        message.Content = new StreamContent(content.Stream!);
         message.Content.Headers.ContentLength = content.ContentLength;
-        message.StatusCode = HttpStatusCode.OK;
         message.Content.Headers.ContentType = new MediaTypeHeaderValue(content.ContentType!);
         message.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
         {
