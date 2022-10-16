@@ -23,7 +23,14 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        environment: 'AzureStack'
 
+    - run: |
+        az webapp list --query "[?state=='Running']"
     - name: 'Resolve Project Dependencies Using Dotnet'
       shell: bash
       run: |
