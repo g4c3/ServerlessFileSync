@@ -1,0 +1,9 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "Your_ST_ConnectionString",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "SCM_DO_BUILD_DURING_DEPLOYMENT": false,
+    "ENABLE_ORYX_BUILD": false
+  }
+}
