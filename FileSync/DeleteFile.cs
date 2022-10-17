@@ -25,7 +25,7 @@ public class DeleteFile
     [OpenApiParameter(name: "name", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The **Name** parameter")]
     [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]
     public static async Task<IActionResult> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "delete", Route = null)] HttpRequest req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = null)] HttpRequest req)
     {
         var stream = await new StreamReader(req.Body, Encoding.UTF8).ReadToEndAsync();
         DoDRequest requestObect = JsonConvert.DeserializeObject<DoDRequest>(stream)!;
